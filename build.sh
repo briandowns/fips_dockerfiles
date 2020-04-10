@@ -7,11 +7,7 @@
 
 set -e 
 
-USAGE='build.sh [component]
-examples:
-    build.sh all
-    build.sh kubernetes
-'
+USAGE='usage: build.sh [component]'
 
 DOCKER=$(which docker)
 
@@ -30,27 +26,25 @@ fi
 # the actual Docker build process for the
 # given component.
 build() {
-    component=$1
+    cd "$1"
+    component=$(echo "$1" | sed 's/\.\///g')
     ${DOCKER} build -t fips_"${component}":latest .
+    cd ..
 }
 
 COMPONENT=$1
 
-case ${COMPONENT} in 
-    all)
-        components=$(find . -type d ! -name '.')
-        for i in ${components}; do 
-            build "${i}"
-        done
-        ;;
-    kubernetes)
-        cd "${COMPONENT}"
+if [ "${COMPONENT}" = "all" ]; then
+    components=$(find . -type d ! -name '.')
+    for i in ${components}; do 
+        echo "building for ${i}..."
         build "${i}"
-        ;;
-    *)
-        echo "error: unrecognized component"
-        exit 1
-        ;;
-esac
+    done
+elif [ -d "${COMPONENT}" ]; then 
+    build "${COMPONENT}"
+else
+    echo "error: unrecognized component"
+    exit 1     
+fi
 
 exit 0

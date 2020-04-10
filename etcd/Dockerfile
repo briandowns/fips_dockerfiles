@@ -8,19 +8,20 @@ RUN apt update                                   && \
                    libc-pic libc-dev
 
 RUN git clone --depth=1 https://github.com/etcd-io/etcd.git
-RUN cd /go/etcd                                                                           && \
+RUN cd /go/etcd && \
     make build
 
 FROM builder as strip
 ARG SEARCH_KEY=boring
-RUN go tool nm /go/kubernetes/_output/bin/kubectl > /kubectl_symbol_table.txt && \
-    grep ${SEARCH_KEY} /kubectl_symbol_table.txt                              && \
-    cd /go/kubernetes                                                         && \
-    make all
+RUN go tool nm /go/etcd/bin/etcdctl > /etcdctl_symbol_table.txt && \
+    grep ${SEARCH_KEY} /etcdctl_symbol_table.txt && \
+    cd /go/etcd                                  && \
+    make build
 
 FROM ${UBI_IMAGE}
 RUN yum update -y  && \
     yum upgrade -y && \
-    yum install -y binutils file gdb
-COPY --from=builder /go/etcd/bin/etcd .
+    yum install -y binutils file
+COPY --from=strip /go/etcd/bin/etcd .
+COPY --from=strip /go/etcd/bin/etcdctl .
 CMD ["objdump", "-s", "/etcd"]

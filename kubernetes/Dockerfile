@@ -21,6 +21,6 @@ RUN go tool nm /go/kubernetes/_output/bin/kubectl > /kubectl_symbol_table.txt &&
 FROM ${UBI_IMAGE}
 RUN yum update -y  && \
     yum upgrade -y && \
-    yum install -y binutils file
+    yum install -y binutils
 COPY --from=strip /go/kubernetes/_output/bin/kubectl .
 CMD ["objdump", "-s" "/kubectl"]
