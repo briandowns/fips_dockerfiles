@@ -17,13 +17,13 @@ RUN cd /go/traefik && \
 FROM builder as strip
 ARG SEARCH_KEY=boring
 RUN go tool nm /go/traefik/bin/traefik > /traefik_symbol_table.txt && \
-    grep ${SEARCH_KEY} /etcdctl_symbol_table.txt && \
-    cd /go/etcd                                  && \
-    make binary
+    grep ${SEARCH_KEY} traefik_symbol_table.txt                    && \
+    cd /go/traefik                                                 && \
+    CGO_ENABLED=1 script/make.sh generate binary
 
 FROM ${UBI_IMAGE}
 RUN yum update -y  && \
     yum upgrade -y && \
     yum install -y binutils file
-COPY --from=strip /go/traefik/bin/traefik .
+COPY --from=strip /go/traefik/dist/traefik .
 CMD ["objdump", "-s", "/traefik"]

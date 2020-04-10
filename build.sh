@@ -22,7 +22,7 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-# build is a responsible for kicking off
+# build is responsible for kicking off
 # the actual Docker build process for the
 # given component.
 build() {
