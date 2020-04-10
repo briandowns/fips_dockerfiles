@@ -14,16 +14,15 @@ RUN git clone --depth=1 https://github.com/containous/traefik.git
 RUN cd /go/traefik && \
     CGO_ENABLED=1 script/make.sh generate binary
 
-FROM builder as strip
+FROM builder as unstripped
 ARG SEARCH_KEY=boring
-RUN go tool nm /go/traefik/bin/traefik > /traefik_symbol_table.txt && \
+RUN go tool nm /go/traefik/dist/traefik > /traefik_symbol_table.txt && \
     grep ${SEARCH_KEY} traefik_symbol_table.txt                    && \
-    cd /go/traefik                                                 && \
     CGO_ENABLED=1 script/make.sh generate binary
 
 FROM ${UBI_IMAGE}
 RUN yum update -y  && \
     yum upgrade -y && \
     yum install -y binutils file
-COPY --from=strip /go/traefik/dist/traefik .
-CMD ["objdump", "-s", "/traefik"]
+COPY --from=unstripped /go/traefik/dist/* .
+CMD ["ls", "/"]

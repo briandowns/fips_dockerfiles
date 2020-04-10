@@ -7,11 +7,11 @@ RUN apt update                                   && \
                    bash build-essential libc-bin    \
                    rsync libc-pic libc-dev
 
-RUN git clone --depth=1 https://github.com/briandowns/kubernetes.git
+RUN git clone --depth=1 https://github.com/kubernetes/kubernetes.git
 RUN cd /go/kubernetes && \
     make all GOLDFLAGS=''
 
-FROM builder as strip
+FROM builder as unstripped
 ARG SEARCH_KEY=boring
 RUN go tool nm /go/kubernetes/_output/bin/kubectl > /kubectl_symbol_table.txt && \
     grep ${SEARCH_KEY} /kubectl_symbol_table.txt                              && \
@@ -22,5 +22,5 @@ FROM ${UBI_IMAGE}
 RUN yum update -y  && \
     yum upgrade -y && \
     yum install -y binutils
-COPY --from=strip /go/kubernetes/_output/bin/kubectl .
+COPY --from=unstripped /go/kubernetes/_output/bin/kubectl .
 CMD ["objdump", "-s" "/kubectl"]

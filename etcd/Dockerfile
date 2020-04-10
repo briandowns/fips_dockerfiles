@@ -11,7 +11,7 @@ RUN git clone --depth=1 https://github.com/etcd-io/etcd.git
 RUN cd /go/etcd && \
     make build
 
-FROM builder as strip
+FROM builder as unstripped
 ARG SEARCH_KEY=boring
 RUN go tool nm /go/etcd/bin/etcdctl > /etcdctl_symbol_table.txt && \
     grep ${SEARCH_KEY} /etcdctl_symbol_table.txt && \
@@ -22,6 +22,6 @@ FROM ${UBI_IMAGE}
 RUN yum update -y  && \
     yum upgrade -y && \
     yum install -y binutils file
-COPY --from=strip /go/etcd/bin/etcd .
-COPY --from=strip /go/etcd/bin/etcdctl .
+COPY --from=unstripped /go/etcd/bin/etcd .
+COPY --from=unstripped /go/etcd/bin/etcdctl .
 CMD ["objdump", "-s", "/etcd"]
