@@ -1,11 +1,10 @@
 ARG UBI_IMAGE=registry.access.redhat.com/ubi8/ubi:latest
 
 FROM goboring/golang:1.13.8b4 as builder
-RUN apt update                                   && \
-    apt upgrade -y                               && \
-    apt install -y apt-utils ca-certificates git    \
-                   bash build-essential libc-bin    \
-                   rsync libc-pic libc-dev
+RUN apt update                                              && \
+    apt upgrade -y                                          && \
+    apt install -y apt-utils ca-certificates git bash rsync && \
+    rm -rf /var/lib/apt/lists/*
 
 RUN git clone --depth=1 https://github.com/kubernetes/kubernetes.git
 RUN cd /go/kubernetes && \
@@ -19,8 +18,9 @@ RUN go tool nm /go/kubernetes/_output/bin/kubectl > /kubectl_symbol_table.txt &&
     make all
 
 FROM ${UBI_IMAGE}
-RUN yum update -y  && \
-    yum upgrade -y && \
-    yum install -y binutils
-COPY --from=unstripped /go/kubernetes/_output/bin/kubectl .
-CMD ["objdump", "-s" "/kubectl"]
+RUN yum update -y           && \
+    yum upgrade -y          && \
+    yum install -y binutils && \
+    mkdir k8s_binaries
+COPY --from=unstripped /go/kubernetes/_output/bin /k8s_binaries
+CMD ["ls", "-ltra", "/k8s_binaries"]

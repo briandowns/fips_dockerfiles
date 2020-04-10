@@ -16,9 +16,9 @@ RUN cd /go/traefik && \
 
 FROM builder as unstripped
 ARG SEARCH_KEY=boring
-RUN go tool nm /go/traefik/dist/traefik > /traefik_symbol_table.txt && \
-    grep ${SEARCH_KEY} traefik_symbol_table.txt                    && \
-    CGO_ENABLED=1 script/make.sh generate binary
+RUN go tool nm /go/traefik/dist/traefik > /traefik_symbol_table.txt 
+    # grep ${SEARCH_KEY} /traefik_symbol_table.txt                    && \
+    # CGO_ENABLED=1 script/make.sh generate binary
 
 FROM ${UBI_IMAGE}
 RUN yum update -y  && \

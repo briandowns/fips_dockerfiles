@@ -4,6 +4,7 @@
 # build.sh is responsible for initialing the 
 # FIPS 140-2 Go build process for the given
 # component(s). 
+#
 
 set -e 
 
