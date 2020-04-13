@@ -11,5 +11,5 @@ FROM ${UBI_IMAGE}
 RUN yum update -y && \
     yum upgrade -y
 
-COPY --from=builder /go/etcd/bin/etcd .
-COPY --from=builder /go/etcd/bin/etcdctl .
+COPY --from=builder /go/etcd/bin/etcd /usr/local/bin
+COPY --from=builder /go/etcd/bin/etcdctl /usr/local/bin
