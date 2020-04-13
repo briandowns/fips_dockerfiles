@@ -22,4 +22,4 @@ Confirmed Working:
 
 Issues:
 
-* Traefik - We would need to upstream a patch to Traefik that would allow additional build parameters to be passed. They are currently locking in the process to not allow CGO.
+* Traefik - We would need to upstream a patch to Traefik that would allow additional build parameters to be passed. They are currently locking in the process to not allow CGO. WE DON'T NEED THIS CURRENTLY.
