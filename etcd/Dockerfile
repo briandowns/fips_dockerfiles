@@ -1,4 +1,4 @@
-ARG UBI_IMAGE=registry.access.redhat.com/ubi8/ubi:latest
+ARG UBI_IMAGE=registry.access.redhat.com/ubi7/ubi:latest
 
 FROM goboring/golang:1.13.3b4 as builder
 RUN apt update && apt upgrade -y
