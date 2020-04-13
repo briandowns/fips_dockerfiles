@@ -13,5 +13,5 @@ RUN cd /go/kubernetes && \
 FROM ${UBI_IMAGE}
 RUN yum update -y && \
     yum upgrade -y
-    
-COPY --from=builder /go/kubernetes/_output/bin /usr/bin
+
+COPY --from=builder /go/kubernetes/_output/bin /usr/local/bin
