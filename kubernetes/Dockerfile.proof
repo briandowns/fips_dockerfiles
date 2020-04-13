@@ -8,6 +8,13 @@ RUN apt update                                              && \
 
 RUN git clone --depth=1 https://github.com/kubernetes/kubernetes.git
 RUN cd /go/kubernetes && \
+    make all GOLDFLAGS=''
+
+FROM builder as unstripped
+ARG SEARCH_KEY=boring
+RUN go tool nm /go/kubernetes/_output/bin/kubectl > /kubectl_symbol_table.txt && \
+    grep ${SEARCH_KEY} /kubectl_symbol_table.txt                              && \
+    cd /go/kubernetes                                                         && \
     make all
 
 FROM ${UBI_IMAGE}
@@ -15,5 +22,5 @@ RUN yum update -y           && \
     yum upgrade -y          && \
     yum install -y binutils && \
     mkdir k8s_binaries
-COPY --from=builder /go/kubernetes/_output/bin /usr/bin
-CMD ["ls", "-ltra", "/usr/bin"]
+COPY --from=unstripped /go/kubernetes/_output/bin /k8s_binaries
+CMD ["ls", "-ltra", "/k8s_binaries"]
