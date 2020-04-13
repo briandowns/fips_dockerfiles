@@ -11,9 +11,7 @@ RUN cd /go/kubernetes && \
     make all
 
 FROM ${UBI_IMAGE}
-RUN yum update -y           && \
-    yum upgrade -y          && \
-    yum install -y binutils && \
-    mkdir k8s_binaries
+RUN yum update -y && \
+    yum upgrade -y
+    
 COPY --from=builder /go/kubernetes/_output/bin /usr/bin
-CMD ["ls", "-ltra", "/usr/bin"]
