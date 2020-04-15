@@ -1,6 +1,7 @@
  
 FROM gcr.io/google_containers/hyperkube:v1.17.4 as hyperkube
 FROM briandowns/fips_kubernetes:latest          as source
+FROM debian:buster                              as buster
 FROM registry.access.redhat.com/ubi7/ubi:latest
 
 RUN ln -s /hyperkube /apiserver                && \
@@ -22,6 +23,7 @@ COPY --from=source /usr/local/bin/kubectl /usr/local/bin/kubectl
 COPY --from=source /usr/local/bin/kubelet /usr/local/bin/kubelet 
 
 RUN rpm -Uhv http://download.ceph.com/rpm-jewel/el7/noarch/ceph-release-1-1.el7.noarch.rpm
+RUN yum -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 RUN yum update && yum upgrade -y && \
     yum install -y ca-certificates  \
     bash                            \
@@ -39,39 +41,33 @@ RUN yum update && yum upgrade -y && \
     git                             \
     e2fsprogs                       \
     xfsprogs                        \
-    jq                              \
-    ipset                           \
     gnupg                           \
     conntrack                       \
     conntrack-tools                 \
     ebtables                        \
+    ethtool                         \
+    ipset                           \
     nfs-utils                       \
     curl                            \
-    util-linux \
-    ethtool
+    util-linux                      \
+    iptables-services               \
+    netbase
 
-# RUN echo "deb http://deb.debian.org/debian stretch-backports main" >> \
-#     /etc/apt/sources.list.d/backports.list \
-#     && clean-install -t stretch-backports glusterfs-client glusterfs-common
-
-# Taken from: https://github.com/kubernetes/kubernetes/blob/master/build/debian-iptables/Dockerfile
-
-# Install latest iptables package from buster-backports
-# RUN echo deb http://deb.debian.org/debian buster-backports main >> /etc/apt/sources.list; \
-#     apt-get update; \
-#     apt-get -t buster-backports -y --no-install-recommends install iptables
+# RUN systemctl disable firewalld && \
+#     systemctl enable iptables   && \
+#     systemctl enable ip6tables
+# RUN systemctl status iptables && \
+#     systemctl status ip6tables
 
 # Install other dependencies and then clean up apt caches
 # RUN clean-install \
-#     conntrack     \
-#     ebtables      \
 #     ipset         \
 #     kmod          \
 #     netbase
 
 # Install iptables wrapper scripts to detect the correct iptables mode
 # the first time any of them is run
-# COPY iptables-wrapper /usr/sbin/iptables-wrapper
+# COPY --from=buster $(which iptables-wrapper) /usr/sbin/iptables-wrapper
 
 # RUN update-alternatives                                                            \
 #     --install /usr/sbin/iptables iptables /usr/sbin/iptables-wrapper 100           \
