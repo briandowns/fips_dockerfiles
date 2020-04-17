@@ -53,29 +53,4 @@ RUN yum update && yum upgrade -y && \
     iptables-services               \
     netbase
 
-# RUN systemctl disable firewalld && \
-#     systemctl enable iptables   && \
-#     systemctl enable ip6tables
-# RUN systemctl status iptables && \
-#     systemctl status ip6tables
-
-# Install other dependencies and then clean up apt caches
-# RUN clean-install \
-#     ipset         \
-#     kmod          \
-#     netbase
-
-# Install iptables wrapper scripts to detect the correct iptables mode
-# the first time any of them is run
-# COPY --from=buster $(which iptables-wrapper) /usr/sbin/iptables-wrapper
-
-# RUN update-alternatives                                                            \
-#     --install /usr/sbin/iptables iptables /usr/sbin/iptables-wrapper 100           \
-#     --slave /usr/sbin/iptables-restore iptables-restore /usr/sbin/iptables-wrapper \
-#     --slave /usr/sbin/iptables-save iptables-save /usr/sbin/iptables-wrapper
-# RUN update-alternatives                                                              \
-#     --install /usr/sbin/ip6tables ip6tables /usr/sbin/iptables-wrapper 100           \
-#     --slave /usr/sbin/ip6tables-restore ip6tables-restore /usr/sbin/iptables-wrapper \
-#     --slave /usr/sbin/ip6tables-save ip6tables-save /usr/sbin/iptables-wrapper
-
 ENTRYPOINT ["/hyperkube"]
