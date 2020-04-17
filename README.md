@@ -19,6 +19,7 @@ Confirmed Working:
 * Kubernetes
 * Etcd
 * Prometheus
+* containerd
 
 Issues:
 
