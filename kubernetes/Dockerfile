@@ -11,7 +11,7 @@ RUN cd /go/kubernetes && \
     make all
 
 FROM ${UBI_IMAGE}
-RUN yum update -y && \
-    yum upgrade -y
+RUN microdnf update -y && \
+    rm -rf /var/cache/yum
 
 COPY --from=builder /go/kubernetes/_output/bin /usr/local/bin

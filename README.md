@@ -17,6 +17,7 @@ build.sh kubernetes
 Confirmed Working:
 
 * Kubernetes
+* Kubernetes Metrics Server
 * Etcd
 * Prometheus
 * containerd
