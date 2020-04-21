@@ -22,6 +22,7 @@ Confirmed Working:
 * Prometheus
 * containerd
 * CoreDNS
+* Flannel
 
 Issues:
 
