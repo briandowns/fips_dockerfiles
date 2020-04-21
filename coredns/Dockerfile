@@ -6,12 +6,12 @@ RUN apt update                         && \
     apt install -y ca-certificates git && \
     rm -rf /var/lib/apt/lists/*
 
-RUN git clone --depth=1 https://github.com/kubernetes-sigs/metrics-server.git
-RUN cd /go/metrics-server && \
+RUN git clone --depth=1 https://github.com/coredns/coredns.git
+RUN cd /go/coredns && \
     CGO_ENABLED=1 make all
 
 FROM ${UBI_IMAGE}
 RUN microdnf update -y && \
     rm -rf /var/cache/yum
 
-COPY --from=builder /go/metrics-server/_output/amd64/metrics-server /usr/local/bin
+COPY --from=builder /go/coredns/coredns /usr/local/bin

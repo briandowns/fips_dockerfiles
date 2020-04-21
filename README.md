@@ -21,6 +21,7 @@ Confirmed Working:
 * Etcd
 * Prometheus
 * containerd
+* CoreDNS
 
 Issues:
 

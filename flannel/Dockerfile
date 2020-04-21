@@ -5,13 +5,15 @@ RUN apt update                         && \
     apt upgrade -y                     && \
     apt install -y ca-certificates git && \
     rm -rf /var/lib/apt/lists/*
+RUN curl https://glide.sh/get | sh
 
-RUN git clone --depth=1 https://github.com/kubernetes-sigs/metrics-server.git
-RUN cd /go/metrics-server && \
-    CGO_ENABLED=1 make all
+RUN git clone --depth=1 https://github.com/coreos/flannel.git
+RUN cd /go/flannel && \
+    #glide update && \
+    CGO_ENABLED=1 make
 
 FROM ${UBI_IMAGE}
 RUN microdnf update -y && \
     rm -rf /var/cache/yum
 
-COPY --from=builder /go/metrics-server/_output/amd64/metrics-server /usr/local/bin
+COPY --from=builder /go/flannel/dist/flanneld-amd64 /usr/local/bin
