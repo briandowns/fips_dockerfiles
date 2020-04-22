@@ -6,19 +6,31 @@ RUN apt update                                      && \
     apt install -y apt-transport-https ca-certificates \
                    software-properties-common git      \
                    curl bash
-RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add                                    && \
-    add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" && \
-    apt update                                                                                               && \
-    apt install -y docker-ce docker-ce-cli containerd.io                                                     && \
-    rm -rf /var/lib/apt/lists/*
-RUN curl https://glide.sh/get | sh
 
-RUN git clone --depth=1 https://github.com/projectcalico/calico.git
-RUN cd /go/calico && \
-    CGO_ENABLED=1 make build-all
+RUN git clone --depth=1 https://github.com/projectcalico/calicoctl.git
+RUN cd /go/calicoctl                                                                                                                                 && \
+    mkdir bin                                                                                                                                        && \
+    CGO_ENABLED=1 go build -v -o bin/calicoctl -ldflags "-X github.com/projectcalico/calicoctl/calicoctl/commands.VERSION=$(git rev-parse --short HEAD) \
+	-X github.com/projectcalico/calicoctl/calicoctl/commands.GIT_REVISION=$(git rev-parse --short HEAD) -s -w" "./calicoctl/calicoctl.go"            && \
+    cd /go
+RUN git clone --depth=1 https://github.com/projectcalico/cni-plugin.git
+RUN cd /go/cni-plugin                                                                                                             && \
+    mkdir bin                                                                                                                     && \
+    CGO_ENABLED=1 go build -v -o bin/calico -ldflags "-X main.VERSION=$(git rev-parse --short HEAD) -s -w" ./cmd/calico           && \
+	CGO_ENABLED=1 go build -v -o bin/calico-ipam -ldflags "-X main.VERSION=$(git rev-parse --short HEAD) -s -w" ./cmd/calico-ipam && \
+    cd /go
+RUN git clone --depth=1 https://github.com/projectcalico/node.git
+RUN cd /go/node                                                                                                                                                 && \
+    mkdir -p dist/bin                                                                                                                                           && \
+    CGO_ENABLED=1 go build -v -o dist/bin/calico-node -ldflags "-X github.com/projectcalico/node/pkg/startup.VERSION=$(git describe --tags --dirty --always)       \
+	-X github.com/projectcalico/node/buildinfo.GitVersion=$(git describe --tags --dirty --always)                                                                  \
+	-X github.com/projectcalico/node/buildinfo.BuildDate=$(date -u +'%FT%T%z')                                                                                     \
+	-X github.com/projectcalico/node/buildinfo.GitRevision=$(git rev-parse HEAD)" ./cmd/calico-node/main.go
 
 FROM ${UBI_IMAGE}
 RUN microdnf update -y && \
     rm -rf /var/cache/yum
 
-COPY --from=builder /go/calico/bin /usr/local/bin
+COPY --from=builder /go/calicoctl/bin /usr/local/bin
+COPY --from=builder /go/cni-plugin/bin /usr/local/bin
+COPY --from=builder /go/node/dist/bin /usr/local/bin

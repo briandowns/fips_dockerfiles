@@ -23,6 +23,7 @@ Confirmed Working:
 * containerd
 * CoreDNS
 * Flannel
+* Calico: CNI-Plugin, node, calicoctl
 
 Issues:
 
