@@ -31,6 +31,6 @@ FROM ${UBI_IMAGE}
 RUN microdnf update -y && \
     rm -rf /var/cache/yum
 
-COPY --from=builder /go/calicoctl/bin  /usr/local/bin
-COPY --from=builder /go/cni-plugin/bin /usr/local/bin
-COPY --from=builder /go/node/dist/bin  /usr/local/bin
+COPY --from=builder /go/calicoctl/bin  /bin
+COPY --from=builder /go/cni-plugin/bin /bin
+COPY --from=builder /go/node/dist/bin  /bin
